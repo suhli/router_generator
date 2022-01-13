@@ -5,7 +5,7 @@ import 'package:source_gen/source_gen.dart';
 import 'annotations.dart';
 import 'builder.dart';
 
-const _paramChecker = TypeChecker.fromRuntime(RouterParam);
+const _paramChecker = TypeChecker.fromRuntime(GenerateRouterParam);
 
 class Arg {
   final String type;
@@ -16,7 +16,7 @@ class Arg {
   Arg(this.type, this.required, this.key, this.fieldName);
 }
 
-class InjectGenerator extends GeneratorForAnnotation<Inject> {
+class InjectGenerator extends GeneratorForAnnotation<GenerateRouteInject> {
   @override
   String generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
@@ -49,8 +49,8 @@ class InjectGenerator extends GeneratorForAnnotation<Inject> {
     String codes = '''
         import '$sourceName';
         import 'package:router_generator/router_generator.dart';
-        void injectDependencies($className state){
-          var map = paramsTable['$pageName'];
+        void injectDependencies($className? state){
+        var map = paramsTable['$pageName'];
         ''';
     for (var fieldElement in e.fields) {
       if (_paramChecker.hasAnnotationOfExact(fieldElement)) {
@@ -82,7 +82,7 @@ class InjectGenerator extends GeneratorForAnnotation<Inject> {
           ''';
         }
         codes += '''
-          if(map.containsKey('$key')){
+          if(map != null && state != null && map.containsKey('$key')){
             state.$fieldName = $statement;
           }
         ''';
@@ -120,7 +120,7 @@ class InjectGenerator extends GeneratorForAnnotation<Inject> {
         requiredArgs.map((arg) => '${arg.type} ${arg.fieldName}').join(',');
     var optionalArgs = args.where((arg) => !arg.required);
     var optionalArgsStr =
-        optionalArgs.map((arg) => '${arg.type} ${arg.fieldName}').join(',');
+        optionalArgs.map((arg) => '${arg.type}? ${arg.fieldName}').join(',');
     codes += '''
     Map<String, dynamic> createRouteArgs($requiredArgsStr${requiredArgsStr.isNotEmpty ? ',' : ''}{$optionalArgsStr}) {
       var args = <String, dynamic>{};
@@ -157,16 +157,19 @@ class InjectGenerator extends GeneratorForAnnotation<Inject> {
   }
 }
 
-class RouterGenerator extends GeneratorForAnnotation<Router> {
+var login = {"page":"test"};
+
+class RouterGenerator extends GeneratorForAnnotation<GenerateRouter> {
   @override
   dynamic generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
     var pageName = annotation.read('pageName').stringValue;
     var className = element.name;
     var import = "import '${element.source.fullName.split('/lib/')[1]}';";
-    return '''
-    $import
-    var $pageName = '$className';
-        ''';
+    return '//$import|$pageName|$className\n';
+    // return '''
+    // $import
+    // var $pageName = '$className';
+    //     ''';
   }
 }

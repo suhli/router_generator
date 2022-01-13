@@ -1,26 +1,26 @@
-class Router {
+class GenerateRouter {
   /// The name of the page
   final String pageName;
 
-  const Router(this.pageName);
+  const GenerateRouter(this.pageName);
 }
 
-class RouterParam {
+class GenerateRouterParam {
   /// The key of the param, use the field name instead if not provided
   final String key;
 
   /// If true, the arguments from route must contains this param
   final bool required;
 
-  const RouterParam({this.key, this.required = false});
+  const GenerateRouterParam({this.key, this.required = false});
 }
 
 /// annotate param field with this when use field'name as key and not required
-const routerParam = RouterParam();
+const routerParam = GenerateRouterParam();
 
 /// The state needs to inject dependencies should annotates with [inject]
-const inject = Inject._();
+const inject = GenerateRouteInject._();
 
-class Inject {
-  const Inject._();
+class GenerateRouteInject {
+  const GenerateRouteInject._();
 }
